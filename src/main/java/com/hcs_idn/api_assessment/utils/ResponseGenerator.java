@@ -12,14 +12,14 @@ public class ResponseGenerator {
         if(pagination == null){
             response = BaseResponse.<T>builder()
                     .message(message)
-                    .code(code)
+                    .code(httpStatus.value())
                     .data(data)
                     .build();
 
         } else{
             response = BaseResponse.<T>builder()
                     .message(message)
-                    .code(code)
+                    .code(httpStatus.value())
                     .data(data)
                     .pagination(pagination)
                     .build();
