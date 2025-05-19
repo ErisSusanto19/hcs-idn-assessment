@@ -20,13 +20,13 @@ public class AdminSeeder {
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.admin-username}")
-    String adminUsername;
+    private String adminUsername;
 
     @Value("${app.admin-email}")
-    String adminEmail;
+    private String adminEmail;
 
     @Value("${app.admin-password}")
-    String adminPassword;
+    private String adminPassword;
 
     @PostConstruct
     @Transactional
