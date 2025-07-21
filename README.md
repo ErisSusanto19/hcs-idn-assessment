@@ -1,13 +1,13 @@
 # Hitachi Channel Solutions Indonesia - Backend API Assessment
 
-**Nama:** [Your Name]
+**Nama:** Eris Susanto
 **Tanggal:** 22 Juli 2025
 
 ## Deskripsi Proyek
 
 Aplikasi ini adalah server backend API yang dibangun menggunakan Spring Boot sesuai dengan assessment yang diberikan. Tujuannya adalah untuk mengelola data transaksi pelanggan, yang dioperasikan oleh staf perusahaan melalui REST API. Aplikasi ini mencakup fungsionalitas CRUD untuk pengguna (staf), pelanggan, produk, dan transaksi, serta menyediakan endpoint untuk pelaporan data.
 
-Untuk dokumentasi detail setiap endpoint API, silakan merujuk ke file **`API_DOCUMENTATION.md`**.
+Untuk dokumentasi detail setiap endpoint API, silakan merujuk ke file **`API-DOCUMENTATION.md`**.
 
 ## Fitur Utama
 
