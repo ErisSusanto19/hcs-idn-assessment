@@ -1,12 +1,16 @@
 package com.hcs_idn.api_assessment.dtos.response;
 
 import com.hcs_idn.api_assessment.enums.PaymentStatus;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.Set;
 
+@Getter
+@Setter
 public class TransactionResponseDTO {
     private UUID id;
     private LocalDateTime transactionTime;

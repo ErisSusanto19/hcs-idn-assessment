@@ -10,4 +10,5 @@ import java.util.UUID;
 public class CustomerSummaryDTO {
     private UUID id;
     private String name;
+    private String email;
 }
