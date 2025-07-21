@@ -6,9 +6,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table (name = "accounts")
@@ -22,33 +21,46 @@ public class Account implements UserDetails {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column (columnDefinition = "varchar(100", unique = true, nullable = false)
+    @Column (columnDefinition = "varchar(100)", unique = true, nullable = false)
     private String email;
 
-    @Column (columnDefinition = "varchar(100", unique = true, nullable = false)
+    @Column (columnDefinition = "varchar(100)", unique = true, nullable = false)
     private String username;
 
-    @Column (columnDefinition = "varchar(100", nullable = false)
+    @Column (columnDefinition = "varchar(100)", nullable = false)
     private String password;
 
-    @Column (name = "role_id")
-    private Role role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "account_roles",
+            joinColumns = @JoinColumn(name = "account_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+    @OneToOne(mappedBy = "account")
+    private User user;
+
+    @OneToOne(mappedBy = "account")
+    private Customer customer;
 
     @Column (name = "is_account_non_expired")
-    private boolean isAccountNonExpired;
+    private boolean isAccountNonExpired = true;
 
     @Column(name = "is_account_non_locked")
-    private boolean isAccountNonLocked;
+    private boolean isAccountNonLocked = true;
 
     @Column(name = "is_credentials_non_expired")
-    private boolean isCredentialsNonExpired;
+    private boolean isCredentialsNonExpired = true;
 
     @Column(name = "is_enabled")
-    private boolean isEnabled;
+    private boolean isEnabled = true;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName().name()));
+        return this.roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name()))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.hcs_idn.api_assessment.dtos.response.BaseResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,7 +18,10 @@ import java.time.LocalDateTime;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class AuthEntryPoint implements AuthenticationEntryPoint {
+    private final ObjectMapper objectMapper;
+
     @Override
     public void commence(
             HttpServletRequest request,
@@ -30,14 +34,16 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
         BaseResponse<Object> errorResponse = BaseResponse.builder()
-                .message("Unauthorized: " + authException)
+                .message("Unauthorized: " + authException.getMessage())
                 .code(HttpStatus.UNAUTHORIZED.value())
                 .data(null)
                 .timestamp(LocalDateTime.now())
                 .build();
 
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-        mapper.writeValue(response.getOutputStream(), errorResponse);
+//        final ObjectMapper mapper = new ObjectMapper();
+//        mapper.findAndRegisterModules();
+//        mapper.writeValue(response.getOutputStream(), errorResponse);
+
+        response.getOutputStream().write(objectMapper.writeValueAsBytes(errorResponse));
     }
 }

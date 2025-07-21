@@ -1,12 +1,12 @@
 package com.hcs_idn.api_assessment.repositories;
 
-import com.hcs_idn.api_assessment.entities.User;
+import com.hcs_idn.api_assessment.entities.Tax;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface TaxRepository extends JpaRepository<Tax, UUID> {
 
 }

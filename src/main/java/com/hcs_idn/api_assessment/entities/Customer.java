@@ -1,8 +1,7 @@
 package com.hcs_idn.api_assessment.entities;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,6 +12,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "customers")
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Customer {
     @Id
     @GeneratedValue
