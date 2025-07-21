@@ -25,4 +25,10 @@ public interface TransactionService {
             String paymentMethod,
             UUID staffId
     );
+
+    BaseResponse<List<TransactionResponseDTO>> getCurrentCustomerTransactions(
+            Pageable pageable,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
 }

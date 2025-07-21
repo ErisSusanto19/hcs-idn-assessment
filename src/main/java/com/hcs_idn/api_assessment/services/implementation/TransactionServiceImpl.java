@@ -5,6 +5,7 @@ import com.hcs_idn.api_assessment.dtos.request.TransactionItemRequestDTO;
 import com.hcs_idn.api_assessment.dtos.response.*;
 import com.hcs_idn.api_assessment.entities.*;
 import com.hcs_idn.api_assessment.enums.PaymentStatus;
+import com.hcs_idn.api_assessment.exceptions.customs.Forbidden;
 import com.hcs_idn.api_assessment.exceptions.customs.NotFound;
 import com.hcs_idn.api_assessment.repositories.*;
 import com.hcs_idn.api_assessment.services.TransactionService;
@@ -111,24 +112,11 @@ public class TransactionServiceImpl implements TransactionService {
         if(customerName != null && !customerName.isEmpty()) spec = spec.and(TransactionSpecification.customerNameLike(customerName));
         if(statuses != null && !statuses.isEmpty()) spec = spec.and(TransactionSpecification.statusIn(statuses));
         if(paymentMethod != null && !paymentMethod.isEmpty()) spec = spec.and(TransactionSpecification.paymentMethodLike(paymentMethod));
-        if(staffId != null) spec = spec.and(TransactionSpecification.createdBy(staffId));
+        if(staffId != null) spec = spec.and(TransactionSpecification.createdByStaff(staffId));
 
         Page<Transaction> transactionPage = transactionRepository.findAll(spec, pageable);
 
-        List<TransactionResponseDTO> dtos = transactionPage.getContent().stream().map(this::mapToResponseDTO).collect(Collectors.toList());
-        PaginationResponse pagination = PaginationResponse.builder()
-                .currentPage(transactionPage.getNumber())
-                .pageSize(transactionPage.getSize())
-                .totalPages(transactionPage.getTotalPages())
-                .totalElements((int) transactionPage.getTotalElements())
-                .build();
-
-        return BaseResponse.<List<TransactionResponseDTO>>builder()
-                .message("Successfully retrieved transactions.")
-                .code(HttpStatus.OK.value())
-                .data(dtos)
-                .pagination(pagination)
-                .build();
+        return buildPaginatedResponse(transactionPage);
     }
 
     @Override
@@ -139,12 +127,41 @@ public class TransactionServiceImpl implements TransactionService {
         return mapToResponseDTO(transaction);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public BaseResponse<List<TransactionResponseDTO>> getCurrentCustomerTransactions(
+            Pageable pageable,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    ) {
+        Customer currentCustomer = getCurrentCustomerEntity();
+
+        Specification<Transaction> spec = Specification.where(TransactionSpecification.forCustomer(currentCustomer.getId()));
+        if (startDate != null) spec = spec.and(TransactionSpecification.hasDateGreaterThanOrEqual(startDate));
+        if (endDate != null) spec = spec.and(TransactionSpecification.hasDateLessThanOrEqual(endDate));
+
+        Page<Transaction> transactionPage = transactionRepository.findAll(spec, pageable);
+
+        return buildPaginatedResponse(transactionPage);
+    }
+
     // --- Helper Methods ---
     private User getCurrentLoggedInStaff() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return accountRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFound("Logged in user not found."))
                 .getUser();
+    }
+
+    private Customer getCurrentCustomerEntity() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFound("Logged in user not found."));
+
+        if (account.getCustomer() == null) {
+            throw new Forbidden("This action is only for customers.");
+        }
+        return account.getCustomer();
     }
 
     private TransactionResponseDTO mapToResponseDTO(Transaction transaction) {
@@ -208,5 +225,25 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return detailDTO;
+    }
+
+    private BaseResponse<List<TransactionResponseDTO>> buildPaginatedResponse(Page<Transaction> transactionPage) {
+        List<TransactionResponseDTO> dtos = transactionPage.getContent().stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+
+        PaginationResponse pagination = PaginationResponse.builder()
+                .currentPage(transactionPage.getNumber())
+                .pageSize(transactionPage.getSize())
+                .totalPages(transactionPage.getTotalPages())
+                .totalElements((int) transactionPage.getTotalElements())
+                .build();
+
+        return BaseResponse.<List<TransactionResponseDTO>>builder()
+                .message("Successfully retrieved transactions.")
+                .code(HttpStatus.OK.value())
+                .data(dtos)
+                .pagination(pagination)
+                .build();
     }
 }

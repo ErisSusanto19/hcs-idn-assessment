@@ -5,13 +5,20 @@ import com.hcs_idn.api_assessment.dtos.request.CustomerProfileUpdateDTO;
 import com.hcs_idn.api_assessment.dtos.request.CustomerUpdateRequestDTO;
 import com.hcs_idn.api_assessment.dtos.response.BaseResponse;
 import com.hcs_idn.api_assessment.dtos.response.CustomerResponseDTO;
+import com.hcs_idn.api_assessment.dtos.response.TransactionResponseDTO;
 import com.hcs_idn.api_assessment.services.CustomerService;
+import com.hcs_idn.api_assessment.services.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +28,7 @@ import java.util.UUID;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final TransactionService transactionService;
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -43,6 +51,17 @@ public class CustomerController {
                 .code(HttpStatus.OK.value())
                 .data(updatedProfile)
                 .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me/transactions")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<BaseResponse<List<TransactionResponseDTO>>> getMyTransactions(
+            @PageableDefault(sort = "transactionTime", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+    ) {
+        BaseResponse<List<TransactionResponseDTO>> response = transactionService.getCurrentCustomerTransactions(pageable, startDate, endDate);
         return ResponseEntity.ok(response);
     }
 

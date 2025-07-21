@@ -31,7 +31,11 @@ public class TransactionSpecification {
         return (root, query, builder) -> builder.like(builder.lower(root.get("paymentMethod")), "%" + method.toLowerCase() + "%");
     }
 
-    public static Specification<Transaction> createdBy(UUID staffId) {
+    public static Specification<Transaction> createdByStaff(UUID staffId) {
         return (root, query, builder) -> builder.equal(root.join("createdBy", JoinType.INNER).get("id"), staffId);
+    }
+
+    public static Specification<Transaction> forCustomer(UUID customerId) {
+        return (root, query, builder) -> builder.equal(root.join("customer", JoinType.INNER).get("id"), customerId);
     }
 }
