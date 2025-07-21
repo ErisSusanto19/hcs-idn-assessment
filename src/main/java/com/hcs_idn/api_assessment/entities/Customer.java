@@ -1,9 +1,14 @@
 package com.hcs_idn.api_assessment.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -11,29 +16,31 @@ import java.util.UUID;
 public class Customer {
     @Id
     @GeneratedValue
+    @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "user_id", nullable = false)
-    private User user;
-
-    @Column(columnDefinition = "varchar(100)", nullable = false)
     private String name;
+    private LocalDate birthdate;
+    private String birthplace;
 
-    @Column(columnDefinition = "varchar(100)", name = "birth_place")
-    private String birthPlace;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false)
+    private Account account;
 
-    @Column(name = "birth_date")
-    private LocalDate birthDate;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "created_by")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
     private User createdBy;
 
-    @Column(name = "updated_at")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by_user_id")
+    private User updatedBy;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @Column(name = "updated_by")
-    private User updatedBy;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Transaction> transactions;
 }
